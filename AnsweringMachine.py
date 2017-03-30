@@ -15,7 +15,7 @@ from nltk.parse.stanford import StanfordDependencyParser
 
 class AnsweringMachine(object):
 
-	def __init__(question, document):
+	def __init__(self, question, document):
 		# unpack question from txt file to string
 		with open(question, 'r') as f:
 			questionString = f.read()
