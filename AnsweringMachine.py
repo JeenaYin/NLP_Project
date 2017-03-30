@@ -10,7 +10,7 @@ import os, sys
 import string
 import math
 import numpy
-import nltk
+from nltk.tag.stanford import StanfordPOSTagger
 
 class AnsweringMachine(object):
 
@@ -22,10 +22,12 @@ class AnsweringMachine(object):
 		return(taggedSentence)
 
 	def answerQuestion(self):
-		pass
+		st = StanfordPOSTagger('english-bidirectional-distsim.tagger')
+		tags = st.tag('What is the airspeed of an unladen swallow ?'.split())
+		print(tags)
 
 	def run(self):
 		self.answerQuestion()
 
 if __name__ == '__main__':
-    AnsweringMachine(question=sys.argv[1], document=sys.argv[2]).run()
+	AnsweringMachine(question=sys.argv[1], document=sys.argv[2]).run()
