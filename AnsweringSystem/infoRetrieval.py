@@ -4,8 +4,7 @@ from collections import defaultdict
 from fuzzywuzzy import fuzz
 
 questionList = []
-questionRanks = dict()
-THRESHHOLD = 50
+THRESHOLD = 50
 
 
 def getQuestions(questionfile):
@@ -16,8 +15,8 @@ def getQuestions(questionfile):
 	for question in content.splitlines():
 		questionList.append(question)
 
-
 	return questionList
+
 
 def getSentences(textfile):
 	with open(textfile, "rt") as fileContents:
@@ -30,16 +29,23 @@ def getSentences(textfile):
 
 def getTargetSentence(question, sentenceList):
 	questionDict = dict()
+	possibleTargetSentences = []
 	maxScore = 0
 	bestSentence = ""
 	for sentence in sentenceList: 
-		questionRank = fuzz.partial_ratio(question, sentence)
-		print(sentence)
-		print(questionRank)
+		questionRank = fuzz.token_set_ratio(question, sentence)
+		# print(sentence)
+		# print(questionRank)
+		if questionRank > THRESHOLD:
+			possibleTargetSentences += [sentence]
 		if questionRank > maxScore:
 			bestSentence = sentence;
 			maxScore = questionRank
-	return bestSentence;
+	if possibleTargetSentences == []:
+		return bestSentence;
+	else: 
+		print(possibleTargetSentences)
+		return possibleTargetSentences
 
 def answerQuestion(targetSentence):
 	return targetSentence
@@ -49,15 +55,15 @@ def main():
 	sentenceList = getSentences("SampleDocument.txt")
 	for question in questions:
 		target = getTargetSentence(question, sentenceList)
-		print(question)
-		print(target)
+		# print(question)
+		# print(target)
 	return 1; 
 
 main();
 
 
 # things to change, depending on the type of sentence. choose target sentence accordingly, 
-# output sever sentences and use them to further determine certain types of question.
+# output several sentences and use them to further determine certain types of question.
 
 
 
