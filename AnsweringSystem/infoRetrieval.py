@@ -56,6 +56,8 @@ def main():
 main();
 
 
+# things to change, depending on the type of sentence. choose target sentence accordingly, 
+# output sever sentences and use them to further determine certain types of question.
 
 
 
