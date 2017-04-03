@@ -34,8 +34,6 @@ def getTargetSentence(question, sentenceList):
 	bestSentence = ""
 	for sentence in sentenceList: 
 		questionRank = fuzz.partial_ratio(question, sentence)
-		print(sentence)
-		print(questionRank)
 		if questionRank > maxScore:
 			bestSentence = sentence;
 			maxScore = questionRank
