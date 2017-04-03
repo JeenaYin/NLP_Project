@@ -24,7 +24,7 @@ export CLASSPATH=$STANFORDTOOLSDIR/stanford-postagger-full-2015-04-20/stanford-p
 export STANFORD_MODELS=$STANFORDTOOLSDIR/stanford-postagger-full-2015-04-20/models:$STANFORDTOOLSDIR/stanford-ner-2015-04-20/classifiers
 
 
-#Organization of Files:
+# Organization of Files:
 
 AnsweringSystem: Code for Answering System
 QuestionSystem: Code for Question System
