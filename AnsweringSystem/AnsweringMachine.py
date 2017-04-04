@@ -19,8 +19,8 @@ from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
 
 # Add the jar and model via their path (instead of setting environment variables):
-jar = '/Users/Hova/Desktop/stanford-postagger-2016-10-31/stanford-postagger.jar'
-model = '/Users/Hova/Desktop/stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
+jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
+model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
 pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 
 
