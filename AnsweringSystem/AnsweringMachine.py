@@ -15,6 +15,15 @@ from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 
 
+from nltk.tag import StanfordPOSTagger
+from nltk import word_tokenize
+
+# Add the jar and model via their path (instead of setting environment variables):
+jar = '/Users/Hova/Desktop/stanford-postagger-2016-10-31/stanford-postagger.jar'
+model = '/Users/Hova/Desktop/stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
+pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
+
+
 class AnsweringMachine(object):
 
 	def __init__(self, question, document):
@@ -25,15 +34,16 @@ class AnsweringMachine(object):
 		self.document = document
 
 	def parse(self, sentence):
-		parser = StanfordParser(model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
-		# depParser = StanfordDependencyParser(model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
-		parsedSentence = parser.raw_parse(sentence)
+		# parser = StanfordParser(model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+		# # depParser = StanfordDependencyParser(model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+		# parsedSentence = parser.raw_parse(sentence)
 		return(parsedSentence)
 
 	def answerQuestion(self):
-		st = StanfordPOSTagger('english-bidirectional-distsim.tagger')
-		tags = st.tag('What is the airspeed of an unladen swallow ?'.split())
-		print(tags)
+		# st = StanfordPOSTagger('english-bidirectional-distsim.tagger')
+		# tags = st.tag('What is the airspeed of an unladen swallow ?'.split())
+		text = pos_tagger.tag(word_tokenize("What's the airspeed of an unladen swallow ?"))
+		print(text)
 
 	def run(self):
 		self.answerQuestion()
