@@ -4,7 +4,7 @@ from collections import defaultdict
 from fuzzywuzzy import fuzz
 
 questionList = []
-THRESHOLD = 50
+THRESHOLD = 60
 
 
 def getQuestions(questionfile):
@@ -35,13 +35,15 @@ def getTargetSentence(question, sentenceList):
 	for sentence in sentenceList: 
 		# print(sentence)
 		# print(questionRank)
+		questionRank = fuzz.token_set_ratio(question, sentence)
+		print(questionRank, sentence)
 		if questionRank > THRESHOLD:
 			possibleTargetSentences += [sentence]
 		if questionRank > maxScore:
 			bestSentence = sentence;
 			maxScore = questionRank
 	if possibleTargetSentences == []:
-		return bestSentence;
+		return [bestSentence];
 	else: 
 		print(possibleTargetSentences)
 		return possibleTargetSentences
