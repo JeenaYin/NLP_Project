@@ -17,6 +17,8 @@ from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
+sys.path.append(os.path.abspath("../Dependencies/"))
+import timex
 
 # Add the jar and model via their path (instead of setting environment variables):
 jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
@@ -35,6 +37,7 @@ class AnsweringMachine(object):
 		with open(sentenceDoc, 'r') as f:
 			sentenceString = f.read()
 			sentenceString = self.clean(sentenceString)
+
 		self.sentence = sentenceString
 		self.wh = "who what when where"
 
@@ -42,9 +45,12 @@ class AnsweringMachine(object):
 	# input: STRING
 	# output: STRING which is stripped
 	def clean(self, s):
-		translator = str.maketrans('', '', string.punctuation)
-		cleanString = s.translate(translator)
-		return(cleanString)
+		#translator = str.maketrans('', '', string.punctuation)
+		#preppedString = s.translate(translator)
+		#preppedString = s.replace(".", " punc").replace(",", " punc").replace("!", " punc").replace("?", " punc")
+		preppedString = s.replace(".", " .").replace(",", " ,").replace("!", " !").replace("?", " ?").replace(";", " ;")
+		preppedString = timex.timexTag(preppedString)
+		return(preppedString)
 
 	# pass in a string to be tagged in NER
 	# input: a STRING, the sentence to be evaluated
@@ -76,9 +82,10 @@ class AnsweringMachine(object):
 			if (qType == None): qType = searchObj[0]
 		# note that we are working in lower case to identify question types
 		if (qType.lower() in self.wh):
-			self.answerWh(qType.lower())
+			answer = self.answerWh(qType.lower())
 		else: 
-			self.answerBinary()
+			answer = self.answerBinary()
+		print(answer)
 
 	# consider binary (yes or no) questions
 	def answerBinary(self):
@@ -98,17 +105,43 @@ class AnsweringMachine(object):
 
 	# consider wh- (subject specific) questions
 	def answerWh(self, wh):
-		print(wh)
+		answer = ""
+		answerLocs = []
 		if (wh == "who"):
-			questionEntities = self.ner(self.question)
-			sentenceEntities = self.ner(self.sentence)
+			questionEnts = self.ner(self.question)
+			sentenceEnts = self.ner(self.sentence)
+			#print(questionEnts)
+			#print(sentenceEnts)
+			for entNum in range(0,len(sentenceEnts)):
+				if (sentenceEnts[entNum][1] == "PERSON"):
+					answerLocs.append(entNum)
+			answerLocs.append(-1)
+			for locNum in range(0,len(answerLocs)-1):
+				answer += sentenceEnts[answerLocs[locNum]][0]
+				answer += " "
+				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
+					answer += "and"
+					answer += " "
+			return(answer)
 		if (wh == "where"):
-			questionEntities = self.ner(self.question)
-			sentenceEntities = self.ner(self.sentence)
+			questionEnts = self.ner(self.question)
+			sentenceEnts = self.ner(self.sentence)
+			print(questionEnts)
+			print(sentenceEnts)
+			for entNum in range(0,len(sentenceEnts)):
+				if (sentenceEnts[entNum][1] == "GPE"):
+					answerLocs.append(entNum)
+			answerLocs.append(-1)
+			for locNum in range(0,len(answerLocs)-1):
+				answer += sentenceEnts[answerLocs[locNum]][0]
+				answer += " "
+				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
+					answer += "and"
+					answer += " "
+			return(answer)
 		if (wh == "when"):
 			questionEntities = self.ner(self.question)
 			sentenceEntities = self.ner(self.sentence)
-		print(questionEntities)
 
 	def run(self):
 		self.answerQuestion()
