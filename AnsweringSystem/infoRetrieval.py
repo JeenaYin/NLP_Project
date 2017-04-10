@@ -36,17 +36,18 @@ def getTargetSentence(question, sentenceList):
 		# print(sentence)
 		# print(questionRank)
 		questionRank = fuzz.token_set_ratio(question, sentence)
-		print(questionRank, sentence)
+		print(sentence)
+		print(questionRank)
 		if questionRank > THRESHOLD:
 			possibleTargetSentences += [sentence]
 		if questionRank > maxScore:
 			bestSentence = sentence;
 			maxScore = questionRank
 	if possibleTargetSentences == []:
-		return [bestSentence];
+		return bestSentence;
 	else: 
 		print(possibleTargetSentences)
-		return possibleTargetSentences
+		return possibleTargetSentences[0]
 
 def answerQuestion(targetSentence):
 	return targetSentence
@@ -56,15 +57,13 @@ def main():
 	sentenceList = getSentences("SampleDocument.txt")
 	for question in questions:
 		target = getTargetSentence(question, sentenceList)
-		# print(question)
-		# print(target)
+		print(question)
+		print(target)
+
 	return 1; 
 
 main();
 
-
-# things to change, depending on the type of sentence. choose target sentence accordingly, 
-# output several sentences and use them to further determine certain types of question.
 
 
 
