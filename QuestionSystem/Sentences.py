@@ -19,9 +19,9 @@ class Sentences:
 			tokenizedSentences.append(word_tokenize(s))
 		self.tokenized = tokenizedSentences
 
-		self.ner =
-		self.when = 
-		self.pos = 
+		self.ner = getNER(self.tokenized)
+		self.when = getWhen(self.tokenized)
+		self.pos = getPOS(self.tokenized)
 
 
 
@@ -43,39 +43,42 @@ def getProN(raw):
 		if maxCount < pNounCounts[k]:
 			maxCount = pNounCounts[k]
 			maxWord = k
-	print(maxWord)
+	# print(maxWord)
 	return maxWord
 
 
-def getParse(sentences):
-	os.environ['CLASSPATH'] = directory+'stanford-parser-full-2015-04-20'
-    os.environ['STANFORD_PARSER'] = directory+'stanford-parser-full-2015-04-20/stanford-parser.jar'
-    os.environ['STANFORD_MODELS'] = directory+'stanford-parser-full-2015-04-20/stanford-parser-3.6.0-models.jar'
-    p = stanford.StanfordParser(model_path=directory+"stanford-parser-full-2015-04-20/models/edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
-    iterTrees = p.raw_parse_sents(sentences)
-    treeList = []
-    for i in iterTrees:
-    	for t in i:
-    		treeList.append(tree)
+# def getParse(sentences):
+# 	os.environ['CLASSPATH'] = directory+'stanford-parser-full-2015-04-20'
+#     os.environ['STANFORD_PARSER'] = directory+'stanford-parser-full-2015-04-20/stanford-parser.jar'
+#     os.environ['STANFORD_MODELS'] = directory+'stanford-parser-full-2015-04-20/stanford-parser-3.6.0-models.jar'
+#     p = stanford.StanfordParser(model_path=directory+"stanford-parser-full-2015-04-20/models/edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+#     iterTrees = p.raw_parse_sents(sentences)
+#     treeList = []
+#     for i in iterTrees:
+#     	for t in i:
+#     		treeList.append(tree)
 
 
-   	return treeList
+#    	return treeList
 
 
 def getNER(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	nerTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.all.3class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
+	# print(nerTags)
 	return nerTags
 
 def getWhen(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
-	nerTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.muc.7class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
-	return nerTags
+	whenTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.muc.7class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
+	# print(whenTags)
+	return whenTags
 
 def getPOS(tokenizedSentences):
 	posTags = []
 	for s in tokenizedSentences:
 		posTags.append(pos_tag(s))
+	# print(posTags)
 	return posTags
 
 class Sentence:
@@ -92,7 +95,7 @@ class Sentence:
 
 
 #testing
-sentences = "Hello New York I like Sarah Newton Paris Paris"
+sentences = "Hello New York I like Sarah Newton Paris Paris May 14th"
 
 testSent = Sentences(sentences)
 
