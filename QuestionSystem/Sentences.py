@@ -5,12 +5,13 @@ from nltk import word_tokenize, pos_tag
 from nltk.tag.stanford import StanfordNERTagger
 import re
 
+#my directory where all my stanford things are stored
 directory = "/Users/sumedhamehta/StanfordTools/"
 
 class Sentences:
 	def __init__(self, content):
 
-		raw = content.strip().decode("ascii", "ignore").encode("ascii")
+		raw = content #content.strip().decode("ascii", "ignore").encode("ascii")
 		self.pronoun = getProN(raw)
 		self.sentences = nltk.tokenize.sent_tokenize(content)
 		self.size = len(self.sentences)
@@ -24,7 +25,7 @@ class Sentences:
 		self.pos = getPOS(self.tokenized)
 
 
-
+#get pronoun of the text 
 def getProN(raw):
 	pNounCounts = dict()
 	tokenized = word_tokenize(raw)
@@ -61,19 +62,23 @@ def getProN(raw):
 
 #    	return treeList
 
-
+#get all named entitites for everything
 def getNER(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	nerTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.all.3class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
 	# print(nerTags)
 	return nerTags
 
+
+#get all when tags
 def getWhen(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	whenTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.muc.7class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
 	# print(whenTags)
 	return whenTags
 
+
+#get all parts of speech
 def getPOS(tokenizedSentences):
 	posTags = []
 	for s in tokenizedSentences:
@@ -81,16 +86,6 @@ def getPOS(tokenizedSentences):
 	# print(posTags)
 	return posTags
 
-class Sentence:
-
-	def __init__(self, s, n):
-		self.currSent = s.sentences[n]
-		self.tokenized = s.tokenized[n]
-		self.ner = s.ner[n]
-		self.when = s.when[n]
-		self.pos = s.pos[n]
-		self.pronoun = s.pronoun
-		
 
 
 
