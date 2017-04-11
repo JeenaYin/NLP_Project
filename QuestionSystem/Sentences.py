@@ -5,12 +5,15 @@ from nltk import word_tokenize, pos_tag
 from nltk.tag.stanford import StanfordNERTagger
 import re
 
-directory = "/Users/sumedhamehta/StanfordTools/stanford-ner-2015-04-20"
+directory = "/Users/charisseharuta/Documents/CMU/Spring2017/NLP/stanford-ner-2015-04-20"
 
 class Sentences:
 	def __init__(self, content):
 
-		raw = content.strip().decode("ascii", "ignore").encode("ascii")
+		# raw = content.strip().decode("ascii", "ignore").encode("ascii")
+		raw = content.strip()
+		# raw2 = raw.decode('ascii', 'ignore')
+		# raw = raw1.encode('ascii')
 		self.pronoun = get_proN(raw)
 		self.sentences = nltk.tokenize.sent_tokenize(content)
 		self.size = len(self.sentences)
@@ -31,6 +34,7 @@ def get_proN(raw):
 	os.environ['CLASSPATH'] = directory
 	ner_tags = StanfordNERTagger(directory+"/classifiers/english.all.3class.distsim.crf.ser.gz").tag(tokenized)
 	for (w, t) in ner_tags:
+		print(w, t)
 		# words are represented as (word, tag)
 		if t == "PERSON":
 			if(w not in pNounCounts):
