@@ -5,14 +5,13 @@ from nltk import word_tokenize, pos_tag
 from nltk.tag.stanford import StanfordNERTagger
 import re
 
-directory = "/Users/sumedhamehta/StanfordTools/"
+directory = "/Users/charisseharuta/Documents/CMU/Spring2017/NLP/" 
+# "/Users/sumedhamehta/StanfordTools/"
 
 class Sentences:
 	def __init__(self, content):
 
-		raw = content.strip().decode("ascii", "ignore").encode("ascii")
-		self.pronoun = get_proN(raw)
-		raw = content.strip().decode("ascii", "ignore").encode("ascii")
+		raw = content.strip()
 		self.pronoun = getProN(raw)
 		self.sentences = nltk.tokenize.sent_tokenize(content)
 		self.size = len(self.sentences)
@@ -33,7 +32,6 @@ def getProN(raw):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	ner_tags = StanfordNERTagger(directory+"stanford-ner-2015-04-20/classifiers/english.all.3class.distsim.crf.ser.gz").tag(tokenized)
 	for (w, t) in ner_tags:
-		print(w, t)
 		# words are represented as (word, tag)
 		if t == "PERSON":
 			if(w not in pNounCounts):
@@ -74,7 +72,7 @@ def getNER(tokenizedSentences):
 def getWhen(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	whenTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.muc.7class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
-	# print(whenTags)
+	print(whenTags)
 	return whenTags
 
 def getPOS(tokenizedSentences):
@@ -98,7 +96,7 @@ class Sentence:
 
 
 #testing
-sentences = "Hello New York I like Sarah Newton Paris Paris May 14th"
+sentences = "I like Sarah on May 14th"
 
 testSent = Sentences(sentences)
 
