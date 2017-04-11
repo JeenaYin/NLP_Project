@@ -1,4 +1,5 @@
 import os 
+import en
 import nltk
 from nltk.parse import stanford
 from nltk import word_tokenize, pos_tag
@@ -92,13 +93,49 @@ class Sentence:
 		self.pos = s.pos[n]
 		self.pronoun = s.pronoun
 		
+		self.len = len(self.tokenized)
+
+	def __repr__(self):
+		return str(self.ner)
+		
+
+def who(sentence):
+	possQs = []
+	for i in range(0, sentence.len):
+		if sentence.ner[i][1] == 'PERSON':
+			possQs.append("Who is " + sentence.ner[i][0])
+		else:
+			if en.is_verb(sentence.tokenized[i]):
+				possQs.append("Who " + str(sentence.tokenized[0:]))
+
+	return possQs
+
+
+def when(sentence):
+	for i in range(0, sentence.len):
+		if sentence.when[i][1] == 'DATE':
+			return ("When do " + str(sentence.tokenized[0:i - 1]))
 
 
 
 #testing
-sentences = "I like Sarah on May 14th"
+sentences = "George is the president of the united states of america"
 
 testSent = Sentences(sentences)
 
+test0 = Sentence(testSent, 0)
+# test1 = Sentence(testSent, 1)
+# test2 = Sentence(testSent, 2)
+# test3 = Sentence(testSent, 3)
 
+
+print(who(test0))
+# print(who(test1))
+# print(who(test2))
+# print(who(test3))
+
+# print(when(test0))
+# print(when(test1))
+# print(when(test2))
+# print(when(test3))
 
