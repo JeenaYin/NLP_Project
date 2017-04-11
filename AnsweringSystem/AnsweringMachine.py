@@ -13,8 +13,6 @@ import numpy
 from nltk.tag.stanford import StanfordPOSTagger
 from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
-
-
 from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
 
@@ -31,6 +29,7 @@ class AnsweringMachine(object):
 		with open(question, 'r') as f:
 			questionString = f.read()
 		self.question = questionString
+		# answer is contained in sentence below
 		self.document = document
 
 	def parse(self, sentence):
