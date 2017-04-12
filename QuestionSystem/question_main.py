@@ -202,6 +202,7 @@ def getWhereQuestions(s):
 
  	elif locationFirst:
  		w = vals["verb"][1]
+
  		bigchunk = ''.join(str(e) + " " for e in sentence[locationFirstIndex:])
  		bigchunk = bigchunk.replace(".", "")
  		bigchunk = bigchunk.replace("!", "")
@@ -211,17 +212,65 @@ def getWhereQuestions(s):
  		return []
 
 
+def getWhyQuestions(s):
+	n = s.ner
+ 	p = s.pos
+ 	nerTag = copy.deepcopy(n)
+ 	sentence = s.tokenized
+ 	posTag = copy.deepcopy(p)
+ 	verbType = None
+ 	possible = False
+ 	verbSeen = False
+ 	subjectSeen = False
+ 	becauseSynonyms = {"because", "since"}
+ 	verbI = None
+ 	subI = None
+ 	end = 0
+ 	dt = None
+ 	print(posTag)
+ 	for word in becauseSynonyms:
+ 		if word in sentence:
+ 			possible = True
 
+ 	if not possible: 
+ 		return []
+ 	for w in range(len(sentence)):
+ 		print(sentence[w])
+ 		if sentence[w] in {"because", "since"}:
+ 			end = w
+ 		if posTag[w][1] in {"NN", "NNP", "PRP", "NNS"} and not subjectSeen:
+ 			subI = w
+ 			print(subI)
+ 			subjectSeen = True
+ 			if(w-1 >= 0):
+ 				if(posTag[w-1][1] == "DT"):
+ 					dt = sentence[w-1]
+ 				else:
+ 					dt = None
 
+ 		if posTag[w][1] in {"VBD", "VBZ", "VBP"} and not verbSeen:
+ 			verbSeen = True
+ 			verbI = w
+
+ 	print(subI)
+
+ 	if subI != None and verbI!=None:
+ 		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
+ 		bigchunk = bigchunk.replace(".", "")
+ 		bigchunk = bigchunk.replace("!", "")
+ 		if dt == None: 
+ 			return ["Why" + " " + sentence[verbI] + " " + sentence[subI] + " " + bigchunk + "?"]
+ 		else:
+ 			return ["Why" + " " + sentence[verbI] + " " + dt + " " + sentence[subI] + " " + bigchunk + "?"]
 
 
 # def getHowQuestions(s):
 
 #testing
-sentences = "The United States is known for racism."
+sentences = "Pandas are becoming extinct because they don't give birth to that many babies."
 testSent = Sentences(sentences)
 testS = Sentence(testSent, 0)
-print(getBinaryQuestions(testS))
+print(getWhyQuestions(testS))
 
 
 
