@@ -9,8 +9,8 @@ import copy
 
 
 
-#charisse: who what when why
-#sumi: binary, how, where
+#charisse: who what when 
+#sumi: binary, why, where
 
 directory =  "/Users/charisseharuta/Documents/CMU/Spring2017/NLP/"  #"/Users/sumedhamehta/StanfordTools/" 
 
@@ -244,19 +244,19 @@ def what(sentence):
 
 
 def getWhereQuestions(s):
- 	n = s.ner
- 	p = s.pos
- 	nerTag = copy.deepcopy(n)
- 	sentence = s.tokenized
- 	posTag = copy.deepcopy(p)
- 	finalQ = []
- 	subjectFirst = False
- 	locationFirst = False
- 	subjectFirstIndex = 0 
- 	locationFirstIndex = 0
- 	vals = dict()
+	n = s.ner
+	p = s.pos
+	nerTag = copy.deepcopy(n)
+	sentence = s.tokenized
+	posTag = copy.deepcopy(p)
+	finalQ = []
+	subjectFirst = False
+	locationFirst = False
+	subjectFirstIndex = 0 
+	locationFirstIndex = 0
+	vals = dict()
 
- 	for w in range(len(sentence)):
+	for w in range(len(sentence)):
  		if subjectFirst:
  			if (posTag[w][1] in {"VBD", "VBZ"}):
  				vals["verb"] = (sentence[w], w)
@@ -264,25 +264,26 @@ def getWhereQuestions(s):
 
  			if (nerTag[w][1] == "LOCATION" and sentence[w-1] in {"at", "in"}):
  				subjectFirstIndex = w - 1 #ending
-  		
-  		if locationFirst: 
+
+ 		if locationFirst: 
   			if (posTag[w][1] in {"VBD", "VBZ"}):
   				vals["verb"] = (sentence[w], w)
   				locationFirstIndex = w  #starting
   				break
 
 
- 		if(not subjectFirst and not locationFirst): 
- 			if(nerTag[w][1] == "LOCATION"):
+ 		if (not subjectFirst and not locationFirst): 
+ 			if (nerTag[w][1] == "LOCATION"):
  				locationFirst = True 
- 			elif(posTag[w][1] in {"NN", "NNP", "PRP"}):
- 				subjectFirst = True
- 				vals["sub"] = (sentence[w], w)
+ 			else:
+ 				if (posTag[w][1] in {"NN", "NNP", "PRP"}):
+ 					subjectFirst = True
+ 					vals["sub"] = (sentence[w], w)
 
- 	if subjectFirstIndex == 0 and locationFirstIndex == 0:
+	if subjectFirstIndex == 0 and locationFirstIndex == 0:
  		return []
 
- 	elif subjectFirst:
+	elif subjectFirst:
  		w1 = vals["verb"][1]
  		bigchunk1 = ''.join(str(e) for e in sentence[w1+1:subjectFirstIndex])
  		bigchunk1 = bigchunk1.replace(",", " ")
@@ -298,7 +299,7 @@ def getWhereQuestions(s):
  		else:
  			return ["Where does " + vals["sub"][0] +  en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
 
- 	elif locationFirst:
+	elif locationFirst:
  		w = vals["verb"][1]
 
  		bigchunk = ''.join(str(e) + " " for e in sentence[locationFirstIndex:])
@@ -306,33 +307,33 @@ def getWhereQuestions(s):
  		bigchunk = bigchunk.replace("!", "")
  		return["Where is " + bigchunk + "?"]
 
- 	else:
+	else:
  		return []
 
 
 def getWhyQuestions(s):
 	n = s.ner
- 	p = s.pos
- 	nerTag = copy.deepcopy(n)
- 	sentence = s.tokenized
- 	posTag = copy.deepcopy(p)
- 	verbType = None
- 	possible = False
- 	verbSeen = False
- 	subjectSeen = False
- 	becauseSynonyms = {"because", "since"}
- 	verbI = None
- 	subI = None
- 	end = 0
- 	dt = None
- 	print(posTag)
- 	for word in becauseSynonyms:
+	p = s.pos
+	nerTag = copy.deepcopy(n)
+	sentence = s.tokenized
+	posTag = copy.deepcopy(p)
+	verbType = None
+	possible = False
+	verbSeen = False
+	subjectSeen = False
+	becauseSynonyms = {"because", "since"}
+	verbI = None
+	subI = None
+	end = 0
+	dt = None
+	print(posTag)
+	for word in becauseSynonyms:
  		if word in sentence:
  			possible = True
 
- 	if not possible: 
+	if not possible: 
  		return []
- 	for w in range(len(sentence)):
+	for w in range(len(sentence)):
  		print(sentence[w])
  		if sentence[w] in {"because", "since"}:
  			end = w
@@ -350,9 +351,9 @@ def getWhyQuestions(s):
  			verbSeen = True
  			verbI = w
 
- 	print(subI)
+	print(subI)
 
- 	if subI != None and verbI!=None:
+	if subI != None and verbI!=None:
  		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
  		bigchunk = bigchunk.replace(".", "")
  		bigchunk = bigchunk.replace("!", "")
@@ -367,7 +368,7 @@ def getWhyQuestions(s):
 sentences = "Pandas are becoming extinct because they don't give birth to that many babies."
 testSent = Sentences(sentences)
 testS = Sentence(testSent, 0)
-print(getWhyQuestions(testS))
+print(what(testS))
 
 
 
