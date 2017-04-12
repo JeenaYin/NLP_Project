@@ -54,19 +54,6 @@ def getProN(raw):
 	return maxWord
 
 
-# def getParse(sentences):
-# 	os.environ['CLASSPATH'] = directory+'stanford-parser-full-2015-04-20'
-#     os.environ['STANFORD_PARSER'] = directory+'stanford-parser-full-2015-04-20/stanford-parser.jar'
-#     os.environ['STANFORD_MODELS'] = directory+'stanford-parser-full-2015-04-20/stanford-parser-3.6.0-models.jar'
-#     p = stanford.StanfordParser(model_path=directory+"stanford-parser-full-2015-04-20/models/edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
-#     iterTrees = p.raw_parse_sents(sentences)
-#     treeList = []
-#     for i in iterTrees:
-#     	for t in i:
-#     		treeList.append(tree)
-#    	return treeList
-
-
 def getNER(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	nerTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.all.3class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
@@ -158,14 +145,70 @@ def getBinaryQuestions(s):
 	return [finalQ]
 
 
- # def getWhereQuestions(s):
- # 	n = s.NER
- # 	p = s.pos
- # 	nerTags = copy.deepcopy(n)
- # 	sentence = s.tokenized
- # 	posTags = copy.deepcopy(n)
- 	
+def getWhereQuestions(s):
+ 	n = s.ner
+ 	p = s.pos
+ 	nerTag = copy.deepcopy(n)
+ 	sentence = s.tokenized
+ 	posTag = copy.deepcopy(p)
+ 	finalQ = []
+ 	subjectFirst = False
+ 	locationFirst = False
+ 	subjectFirstIndex = 0 
+ 	locationFirstIndex = 0
+ 	vals = dict()
 
+ 	for w in range(len(sentence)):
+ 		if subjectFirst:
+ 			if (posTag[w][1] in {"VBD", "VBZ"}):
+ 				vals["verb"] = (sentence[w], w)
+
+
+ 			if (nerTag[w][1] == "LOCATION" and sentence[w-1] in {"at", "in"}):
+ 				subjectFirstIndex = w - 1 #ending
+  		
+  		if locationFirst: 
+  			if (posTag[w][1] in {"VBD", "VBZ"}):
+  				vals["verb"] = (sentence[w], w)
+  				locationFirstIndex = w  #starting
+  				break
+
+
+ 		if(not subjectFirst and not locationFirst): 
+ 			if(nerTag[w][1] == "LOCATION"):
+ 				locationFirst = True 
+ 			elif(posTag[w][1] in {"NN", "NNP", "PRP"}):
+ 				subjectFirst = True
+ 				vals["sub"] = (sentence[w], w)
+
+ 	if subjectFirstIndex == 0 and locationFirstIndex == 0:
+ 		return []
+
+ 	elif subjectFirst:
+ 		w1 = vals["verb"][1]
+ 		bigchunk1 = ''.join(str(e) for e in sentence[w1+1:subjectFirstIndex])
+ 		bigchunk1 = bigchunk1.replace(",", " ")
+
+ 		w0 = vals["sub"][1]
+ 		bigchunk0 = ''.join(str(e) for e in sentence[w0-1:w1])
+ 		print(bigchunk0)
+ 		bigchunk0 = bigchunk0.replace(",", " ")
+ 		if (vals["verb"][0] in {"is", "was"}):
+ 			return ["Where " + vals["verb"][0]+ " " + bigchunk0 + " " + bigchunk1 + "?"]
+ 		elif(nerTag[vals["verb"][1]][1] == "VBD"):
+ 			return ["Where did " + vals["sub"][0] + en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+ 		else:
+ 			return ["Where does " + vals["sub"][0] +  en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+
+ 	elif locationFirst:
+ 		w = vals["verb"][1]
+ 		bigchunk = ''.join(str(e) + " " for e in sentence[locationFirstIndex:])
+ 		bigchunk = bigchunk.replace(".", "")
+ 		bigchunk = bigchunk.replace("!", "")
+ 		return["Where is " + bigchunk + "?"]
+
+ 	else:
+ 		return []
 
 
 
@@ -175,7 +218,7 @@ def getBinaryQuestions(s):
 # def getHowQuestions(s):
 
 #testing
-sentences = "Bob is really nice and really cool."
+sentences = "The United States is known for racism."
 testSent = Sentences(sentences)
 testS = Sentence(testSent, 0)
 print(getBinaryQuestions(testS))
