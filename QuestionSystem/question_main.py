@@ -1,13 +1,19 @@
 import os 
 import en
 import nltk
+import en
 from nltk.parse import stanford
 from nltk import word_tokenize, pos_tag
 from nltk.tag.stanford import StanfordNERTagger
 import re
+import copy
 
-directory = "/Users/charisseharuta/Documents/CMU/Spring2017/NLP/" 
-# "/Users/sumedhamehta/StanfordTools/"
+
+
+#charisse: who what when why
+#sumi: binary, how, where
+
+directory = "/Users/sumedhamehta/StanfordTools/" #"/Users/charisseharuta/Documents/CMU/Spring2017/NLP/" 
 
 class Sentences:
 	def __init__(self, content):
@@ -59,8 +65,6 @@ def getProN(raw):
 #     for i in iterTrees:
 #     	for t in i:
 #     		treeList.append(tree)
-
-
 #    	return treeList
 
 
@@ -99,6 +103,77 @@ class Sentence:
 		return str(self.ner)
 		
 
+
+def getBinaryQuestions(s):
+	posTag = copy.deepcopy(s.pos)
+	pronoun = s.pronoun
+	change = False
+	possibleBeginnings = {"is", "are", "does", "were", "can", "were", "will", "has", "had", "have", "could", "would", "should"}
+	possVerbs = []
+	for i in range(len(posTag)):
+		word = posTag[i][0]
+		tag = posTag[i][1]
+		if word in possibleBeginnings: 
+			possVerbs.append(i)
+
+	print(possVerbs)
+	if len(possVerbs) == 0:
+		posTag.insert(0, ('did', 'VBD')) #verb past tense
+		change = True
+	else:
+		posTag.insert(0, posTag.pop(possVerbs[0]))
+
+#testing
+
+	if posTag[1][1] == "NNP" or posTag[1][1] == "DT":
+		proper = True
+	else: 
+		proper = False
+	
+	finalQ = posTag[0][0].title() + " "
+	print(posTag)
+	for i in range(len(posTag)-1):
+		w = posTag[i+1][0]
+		if i == 0:
+			if posTag[1][1] == "PRP":
+				print(pronoun)
+				w = pronoun
+			elif posTag[1][1] == "NNP":
+				print(word)
+				w = w.lower()
+
+		if i == len(posTag)-2:
+			if (posTag[i+1][0] in {".", "!"}):
+				w = '?'
+
+		wnew = ""
+		if change:
+			try: 
+				wnew = en.verb.present(w)
+
+			except: 
+				wnew = w
+
+		else:
+			wnew = w
+
+		if i == len(posTag)-3:
+			finalQ += wnew
+
+		else:
+			finalQ += wnew + ' '
+
+	return [finalQ]
+
+
+ # def getWhereQuestions(s):
+ # 	n = s.NER
+ # 	p = s.pos
+ # 	nerTags = copy.deepcopy(n)
+ # 	sentence = s.tokenized
+ # 	posTags = copy.deepcopy(n)
+ 	
+ 	
 def who(sentence):
 	possQs = []
 	for i in range(0, sentence.len):
@@ -118,12 +193,20 @@ def when(sentence):
 
 
 
-#testing
-sentences = "George is the president of the united states of america"
+# def getHowQuestions(s):
 
+#testing
+
+sentences = "George is the president of the united states of america"
 testSent = Sentences(sentences)
 
 test0 = Sentence(testSent, 0)
+# sentences = "Bob is really nice and really cool."
+# testSent = Sentences(sentences)
+# testS = Sentence(testSent, 0)
+# print(getBinaryQuestions(testS))
+
+# test0 = Sentence(testSent, 0)
 # test1 = Sentence(testSent, 1)
 # test2 = Sentence(testSent, 2)
 # test3 = Sentence(testSent, 3)
