@@ -1,7 +1,6 @@
 import os 
-import en
+# import en
 import nltk
-import en
 from nltk.parse import stanford
 from nltk import word_tokenize, pos_tag
 from nltk.tag.stanford import StanfordNERTagger
@@ -13,7 +12,7 @@ import copy
 #charisse: who what when why
 #sumi: binary, how, where
 
-directory = "/Users/sumedhamehta/StanfordTools/" #"/Users/charisseharuta/Documents/CMU/Spring2017/NLP/" 
+directory =  "/Users/charisseharuta/Documents/CMU/Spring2017/NLP/"  #"/Users/sumedhamehta/StanfordTools/" 
 
 class Sentences:
 	def __init__(self, content):
@@ -173,52 +172,96 @@ def getBinaryQuestions(s):
  # 	sentence = s.tokenized
  # 	posTags = copy.deepcopy(n)
  	
- 	
-def who(sentence):
-	possQs = []
-	for i in range(0, sentence.len):
-		if sentence.ner[i][1] == 'PERSON':
-			possQs.append("Who is " + sentence.ner[i][0])
-		else:
-			if en.is_verb(sentence.tokenized[i]):
-				possQs.append("Who " + str(sentence.tokenized[0:]))
 
-	return possQs
+def who(sentence):
+	q = []
+	found = False
+	newSubject = False
+	persons = 0
+	for i in range(0, sentence.len):
+		if found:
+			if (sentence.pos[i][1] in ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'MD'] 
+				and sentence.ner[i-1][1] in ['PERSON', 'ORGANIZATION']):
+				q.pop()
+				q.append("Who")
+				q.append(sentence.tokenized[i])
+				newSubject = True
+			else:
+				q.append(sentence.tokenized[i])
+		if not found and sentence.pos[i][1] in ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'MD'] and i != 0:
+			q.append("Who")
+			q.append(sentence.tokenized[i])
+			found = True
+		if i == sentence.len - 1:
+			q.pop()
+			q.append("?")
+
+	return q
 
 
 def when(sentence):
-	for i in range(0, sentence.len):
-		if sentence.when[i][1] == 'DATE':
-			return ("When do " + str(sentence.tokenized[0:i - 1]))
+	q = []
+	found = False
+	for i in range(1, sentence.len):
+		if not found:
+			if ((sentence.ner[i-1][1] == 'PERSON' and i < sentence.len - 1) and 
+			   ((sentence.pos[i][1] == 'MD' and sentence.pos[i+1][1] == 'VB') or
+			    (sentence.pos[i][1] == 'VBD' and sentence.pos[i+1][1] == 'VBG'))):
+				q.append("When")
+				q.append(sentence.tokenized[i])
+				q.append(sentence.tokenized[i-1])
+				found = True
+
+			else:
+				if (sentence.ner[i-1][1] == 'PERSON' and i < sentence.len and
+					(sentence.pos[i][1] in ['VBZ', 'VBD'])):
+					if sentence.pos[i][1] == 'VBZ':
+						verb = "will"
+					else:
+						verb = "did"
+					new = sentence.tokenized[i]
+					q.append("When")
+					q.append(verb)
+					q.append(sentence.tokenized[i-1])
+					q.append(new)
+					found = True
+
+		else:
+			if (sentence.when[i][1] in ['DATE', 'TIME'] or sentence.tokenized[i]
+				in ['today', 'tomorrow', 'yesterday']):
+				if sentence.tokenized[i-1] in ["by", "after", "before", "during", "when", "while", 'on', 'in', 'last']:
+					q.pop()
+				q.append("?")
+				return q
+			elif (sentence.tokenized[i] in ["after", "before", "during", "when", "while"]):
+				q.append("?")
+				return q
+			elif i != sentence.len - 1:
+				q.append(sentence.tokenized[i])
+			else:
+				return q
 
 
+def what(sentence):
+	q = []
+	found = False
+	for i in range(1, sentence.len):
+		if i == sentence.len - 1:
+			if len(q) != 0:\
+				q.append("?")
+			return q
+		if found:
+			if sentence.pos[i][1] in ['NN', 'NNP', 'NNS', 'PRP'] and sentence.tokenized[i-1] == 'and':
+				q.pop()
+				q.append("?")
+				return q
+			q.append(sentence.tokenized[i])
+		if (sentence.pos[i][1] in ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'MD']
+			and sentence.ner[i-1][1] != 'PERSON' and sentence.pos[i-1][1] in 
+			['NN', 'NNP', 'NNS', 'PRP'] and not found):
+			q.append("What")
+			q.append(sentence.tokenized[i])
+			found = True
 
-# def getHowQuestions(s):
 
-#testing
-
-sentences = "George is the president of the united states of america"
-testSent = Sentences(sentences)
-
-test0 = Sentence(testSent, 0)
-# sentences = "Bob is really nice and really cool."
-# testSent = Sentences(sentences)
-# testS = Sentence(testSent, 0)
-# print(getBinaryQuestions(testS))
-
-# test0 = Sentence(testSent, 0)
-# test1 = Sentence(testSent, 1)
-# test2 = Sentence(testSent, 2)
-# test3 = Sentence(testSent, 3)
-
-
-print(who(test0))
-# print(who(test1))
-# print(who(test2))
-# print(who(test3))
-
-# print(when(test0))
-# print(when(test1))
-# print(when(test2))
-# print(when(test3))
 
