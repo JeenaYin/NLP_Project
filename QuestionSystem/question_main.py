@@ -54,19 +54,6 @@ def getProN(raw):
 	return maxWord
 
 
-# def getParse(sentences):
-# 	os.environ['CLASSPATH'] = directory+'stanford-parser-full-2015-04-20'
-#     os.environ['STANFORD_PARSER'] = directory+'stanford-parser-full-2015-04-20/stanford-parser.jar'
-#     os.environ['STANFORD_MODELS'] = directory+'stanford-parser-full-2015-04-20/stanford-parser-3.6.0-models.jar'
-#     p = stanford.StanfordParser(model_path=directory+"stanford-parser-full-2015-04-20/models/edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
-#     iterTrees = p.raw_parse_sents(sentences)
-#     treeList = []
-#     for i in iterTrees:
-#     	for t in i:
-#     		treeList.append(tree)
-#    	return treeList
-
-
 def getNER(tokenizedSentences):
 	os.environ['CLASSPATH'] = directory+"stanford-ner-2015-04-20"
 	nerTags = StanfordNERTagger(directory+'stanford-ner-2015-04-20/classifiers/english.all.3class.distsim.crf.ser.gz').tag_sents(tokenizedSentences)
@@ -122,7 +109,6 @@ def getBinaryQuestions(s):
 	else:
 		posTag.insert(0, posTag.pop(possVerbs[0]))
 
-#testing
 
 	if posTag[1][1] == "NNP" or posTag[1][1] == "DT":
 		proper = True
@@ -164,13 +150,6 @@ def getBinaryQuestions(s):
 
 	return [finalQ]
 
-
- # def getWhereQuestions(s):
- # 	n = s.NER
- # 	p = s.pos
- # 	nerTags = copy.deepcopy(n)
- # 	sentence = s.tokenized
- # 	posTags = copy.deepcopy(n)
  	
 
 def who(sentence):
@@ -262,6 +241,133 @@ def what(sentence):
 			q.append("What")
 			q.append(sentence.tokenized[i])
 			found = True
+
+
+def getWhereQuestions(s):
+ 	n = s.ner
+ 	p = s.pos
+ 	nerTag = copy.deepcopy(n)
+ 	sentence = s.tokenized
+ 	posTag = copy.deepcopy(p)
+ 	finalQ = []
+ 	subjectFirst = False
+ 	locationFirst = False
+ 	subjectFirstIndex = 0 
+ 	locationFirstIndex = 0
+ 	vals = dict()
+
+ 	for w in range(len(sentence)):
+ 		if subjectFirst:
+ 			if (posTag[w][1] in {"VBD", "VBZ"}):
+ 				vals["verb"] = (sentence[w], w)
+
+
+ 			if (nerTag[w][1] == "LOCATION" and sentence[w-1] in {"at", "in"}):
+ 				subjectFirstIndex = w - 1 #ending
+  		
+  		if locationFirst: 
+  			if (posTag[w][1] in {"VBD", "VBZ"}):
+  				vals["verb"] = (sentence[w], w)
+  				locationFirstIndex = w  #starting
+  				break
+
+
+ 		if(not subjectFirst and not locationFirst): 
+ 			if(nerTag[w][1] == "LOCATION"):
+ 				locationFirst = True 
+ 			elif(posTag[w][1] in {"NN", "NNP", "PRP"}):
+ 				subjectFirst = True
+ 				vals["sub"] = (sentence[w], w)
+
+ 	if subjectFirstIndex == 0 and locationFirstIndex == 0:
+ 		return []
+
+ 	elif subjectFirst:
+ 		w1 = vals["verb"][1]
+ 		bigchunk1 = ''.join(str(e) for e in sentence[w1+1:subjectFirstIndex])
+ 		bigchunk1 = bigchunk1.replace(",", " ")
+
+ 		w0 = vals["sub"][1]
+ 		bigchunk0 = ''.join(str(e) for e in sentence[w0-1:w1])
+ 		print(bigchunk0)
+ 		bigchunk0 = bigchunk0.replace(",", " ")
+ 		if (vals["verb"][0] in {"is", "was"}):
+ 			return ["Where " + vals["verb"][0]+ " " + bigchunk0 + " " + bigchunk1 + "?"]
+ 		elif(nerTag[vals["verb"][1]][1] == "VBD"):
+ 			return ["Where did " + vals["sub"][0] + en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+ 		else:
+ 			return ["Where does " + vals["sub"][0] +  en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+
+ 	elif locationFirst:
+ 		w = vals["verb"][1]
+
+ 		bigchunk = ''.join(str(e) + " " for e in sentence[locationFirstIndex:])
+ 		bigchunk = bigchunk.replace(".", "")
+ 		bigchunk = bigchunk.replace("!", "")
+ 		return["Where is " + bigchunk + "?"]
+
+ 	else:
+ 		return []
+
+
+def getWhyQuestions(s):
+	n = s.ner
+ 	p = s.pos
+ 	nerTag = copy.deepcopy(n)
+ 	sentence = s.tokenized
+ 	posTag = copy.deepcopy(p)
+ 	verbType = None
+ 	possible = False
+ 	verbSeen = False
+ 	subjectSeen = False
+ 	becauseSynonyms = {"because", "since"}
+ 	verbI = None
+ 	subI = None
+ 	end = 0
+ 	dt = None
+ 	print(posTag)
+ 	for word in becauseSynonyms:
+ 		if word in sentence:
+ 			possible = True
+
+ 	if not possible: 
+ 		return []
+ 	for w in range(len(sentence)):
+ 		print(sentence[w])
+ 		if sentence[w] in {"because", "since"}:
+ 			end = w
+ 		if posTag[w][1] in {"NN", "NNP", "PRP", "NNS"} and not subjectSeen:
+ 			subI = w
+ 			print(subI)
+ 			subjectSeen = True
+ 			if(w-1 >= 0):
+ 				if(posTag[w-1][1] == "DT"):
+ 					dt = sentence[w-1]
+ 				else:
+ 					dt = None
+
+ 		if posTag[w][1] in {"VBD", "VBZ", "VBP"} and not verbSeen:
+ 			verbSeen = True
+ 			verbI = w
+
+ 	print(subI)
+
+ 	if subI != None and verbI!=None:
+ 		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
+ 		bigchunk = bigchunk.replace(".", "")
+ 		bigchunk = bigchunk.replace("!", "")
+ 		if dt == None: 
+ 			return ["Why" + " " + sentence[verbI] + " " + sentence[subI] + " " + bigchunk + "?"]
+ 		else:
+ 			return ["Why" + " " + sentence[verbI] + " " + dt + " " + sentence[subI] + " " + bigchunk + "?"]
+
+
+
+#testing
+sentences = "Pandas are becoming extinct because they don't give birth to that many babies."
+testSent = Sentences(sentences)
+testS = Sentence(testSent, 0)
+print(getWhyQuestions(testS))
 
 
 
