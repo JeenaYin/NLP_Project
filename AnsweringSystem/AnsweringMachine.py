@@ -85,7 +85,7 @@ class AnsweringMachine(object):
 		if (qType.lower() in self.wh):
 			answer = self.answerWh(qType.lower(), question, sentence)
 		else:
-			answer = self.answerBinary()
+			answer = self.answerBinary(question, sentence)
 		print(answer)
 
 	# consider binary (yes or no) questions
@@ -170,7 +170,7 @@ class AnsweringMachine(object):
 	def run(self):
 		# answer all questions
 		for i in range(0, len(self.questionList)):
-			print(str(i)+": "+self.questionList[i])
+			print("Question "+str(i)+": "+self.questionList[i])
 			self.answerQuestion(self.questionList[i], self.sentenceList[i])
 
 if __name__ == '__main__':

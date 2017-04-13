@@ -59,7 +59,6 @@ def getTargetSentence(question, sentenceList):
 	if possibleTargetSentences == []:
 		return bestSentence;
 	else: 
-		#print(possibleTargetSentences)
 		return possibleTargetSentences[0]
 
 def answerQuestion(targetSentence):
