@@ -7,4 +7,5 @@ topDir=$PWD
 cd AnsweringSystem
 python InfoRetrieval.py $topDir/$question $topDir/$document
 python AnsweringMachine.py $topDir/$question ChosenSentence.txt
+rm -f ChosenSentence.txt
 cd ..
