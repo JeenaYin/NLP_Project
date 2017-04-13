@@ -326,7 +326,7 @@ def getWhyQuestions(s):
 	subI = None
 	end = 0
 	dt = None
-	print(posTag)
+	# print(posTag)
 	for word in becauseSynonyms:
  		if word in sentence:
  			possible = True
@@ -339,7 +339,7 @@ def getWhyQuestions(s):
  			end = w
  		if posTag[w][1] in {"NN", "NNP", "PRP", "NNS"} and not subjectSeen:
  			subI = w
- 			print(subI)
+ 			# print(subI)
  			subjectSeen = True
  			if(w-1 >= 0):
  				if(posTag[w-1][1] == "DT"):
@@ -351,7 +351,7 @@ def getWhyQuestions(s):
  			verbSeen = True
  			verbI = w
 
-	print(subI)
+	# print(subI)
 
 	if subI != None and verbI!=None:
  		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
@@ -365,10 +365,65 @@ def getWhyQuestions(s):
 
 
 #testing
-sentences = "Pandas are becoming extinct because they don't give birth to that many babies."
-testSent = Sentences(sentences)
-testS = Sentence(testSent, 0)
-print(what(testS))
+# sentences = "Pandas are becoming extinct because they don't give birth to that many babies."
+# testSent = Sentences(sentences)
+# testS = Sentence(testSent, 0)
+# print(what(testS))
 
+def main(file):
+	with open(file, "r") as openContents:
+		content = openContents.read()
+		openContents.close()
+
+	testSentences = Sentences(content)
+	sentenceArray = []
+	for i in range(0, testSentences.size):
+		sentenceArray.append(Sentence(testSentences, i))
+	whoQs = []
+	whatQs = []
+	whenQs = []
+	where = []
+	why = []
+	binary = []
+	for i in range(0, testSentences.size):
+		whoQ = who(sentenceArray[i])
+		if whoQ != None and whoQ != []:
+			whoQs.append(' '.join(who(sentenceArray[i])))
+		whatQ = what(sentenceArray[i])
+		if whatQ != None and whatQ != []:
+			whatQs.append(' '.join(what(sentenceArray[i])))
+		whenQ = when(sentenceArray[i])
+		if whenQ != None and whenQ != []:
+			whenQs.append(' '.join(when(sentenceArray[i])))
+		whereQ = getWhereQuestions(sentenceArray[i])
+		if whereQ != None and whereQ != []:
+			where.append(' '.join(getWhereQuestions(sentenceArray[i])))
+		whyQ = getWhyQuestions(sentenceArray[i])
+		if whyQ != None and whyQ != []:
+			why.append(' '.join(getWhyQuestions(sentenceArray[i])))
+		binaryQ = getBinaryQuestions(sentenceArray[i])
+		if binaryQ != None and binaryQ != []:
+			binary.append(' '.join(getBinaryQuestions(sentenceArray[i])))
+	testFile = open('test.txt', 'w')
+	for item in whoQs:
+		testFile.write("%s\n" % item)
+	testFile.write("\n")
+	for item in whatQs:
+		testFile.write("%s\n" % item)
+	testFile.write("\n")
+	for item in whenQs:
+		testFile.write("%s\n" % item)
+	testFile.write("\n")
+	for item in why:
+		testFile.write("%s\n" % item)
+	testFile.write("\n")
+	for item in where:
+		testFile.write("%s\n" % item)
+	testFile.write("\n")
+	for item in binary:
+		testFile.write("%s\n" % item)
+	testFile.close()
+
+print(main("tester.txt"))
 
 
