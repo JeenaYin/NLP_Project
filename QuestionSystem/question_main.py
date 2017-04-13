@@ -1,5 +1,5 @@
 import os 
-# import en
+import en
 import nltk
 from nltk.parse import stanford
 from nltk import word_tokenize, pos_tag
@@ -257,6 +257,59 @@ def getWhereQuestions(s):
 	vals = dict()
 
 	for w in range(len(sentence)):
+<<<<<<< HEAD
+		if subjectFirst:
+			if (posTag[w][1] in {"VBD", "VBZ"}):
+				vals["verb"] = (sentence[w], w)
+
+
+			if (nerTag[w][1] == "LOCATION" and sentence[w-1] in {"at", "in"}):
+				subjectFirstIndex = w - 1 #ending
+		
+		if locationFirst:
+			if (posTag[w][1] in {"VBD", "VBZ"}):
+				vals["verb"] = (sentence[w], w)
+				locationFirstIndex = w  #starting
+				break
+
+
+		if(not subjectFirst and not locationFirst): 
+			if(nerTag[w][1] == "LOCATION"):
+				locationFirst = True 
+			elif(posTag[w][1] in {"NN", "NNP", "PRP"}):
+				subjectFirst = True
+				vals["sub"] = (sentence[w], w)
+
+	if subjectFirstIndex == 0 and locationFirstIndex == 0:
+		return []
+
+	elif subjectFirst:
+		w1 = vals["verb"][1]
+		bigchunk1 = ''.join(str(e) for e in sentence[w1+1:subjectFirstIndex])
+		bigchunk1 = bigchunk1.replace(",", " ")
+
+		w0 = vals["sub"][1]
+		bigchunk0 = ''.join(str(e) for e in sentence[w0-1:w1])
+		print(bigchunk0)
+		bigchunk0 = bigchunk0.replace(",", " ")
+		if (vals["verb"][0] in {"is", "was"}):
+			return ["Where " + vals["verb"][0]+ " " + bigchunk0 + " " + bigchunk1 + "?"]
+		elif(nerTag[vals["verb"][1]][1] == "VBD"):
+			return ["Where did " + vals["sub"][0] + en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+		else:
+			return ["Where does " + vals["sub"][0] +  en.verb.present(vals["verb"][0])+ " " + bigchunk1 + "?"]
+
+	elif locationFirst:
+		w = vals["verb"][1]
+
+		bigchunk = ''.join(str(e) + " " for e in sentence[locationFirstIndex:])
+		bigchunk = bigchunk.replace(".", "")
+		bigchunk = bigchunk.replace("!", "")
+		return["Where is " + bigchunk + "?"]
+
+	else:
+		return []
+=======
  		if subjectFirst:
  			if (posTag[w][1] in {"VBD", "VBZ"}):
  				vals["verb"] = (sentence[w], w)
@@ -309,6 +362,7 @@ def getWhereQuestions(s):
 
 	else:
  		return []
+>>>>>>> c3d81427f538c836114751a0b2d27927d08c50f8
 
 
 def getWhyQuestions(s):
@@ -328,6 +382,30 @@ def getWhyQuestions(s):
 	dt = None
 	# print(posTag)
 	for word in becauseSynonyms:
+<<<<<<< HEAD
+		if word in sentence:
+			possible = True
+
+	if not possible: 
+		return []
+	for w in range(len(sentence)):
+		print(sentence[w])
+		if sentence[w] in {"because", "since"}:
+			end = w
+		if posTag[w][1] in {"NN", "NNP", "PRP", "NNS"} and not subjectSeen:
+			subI = w
+			print(subI)
+			subjectSeen = True
+			if(w-1 >= 0):
+				if(posTag[w-1][1] == "DT"):
+					dt = sentence[w-1]
+				else:
+					dt = None
+
+		if posTag[w][1] in {"VBD", "VBZ", "VBP"} and not verbSeen:
+			verbSeen = True
+			verbI = w
+=======
  		if word in sentence:
  			possible = True
 
@@ -350,10 +428,20 @@ def getWhyQuestions(s):
  		if posTag[w][1] in {"VBD", "VBZ", "VBP"} and not verbSeen:
  			verbSeen = True
  			verbI = w
+>>>>>>> c3d81427f538c836114751a0b2d27927d08c50f8
 
 	# print(subI)
 
 	if subI != None and verbI!=None:
+<<<<<<< HEAD
+		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
+		bigchunk = bigchunk.replace(".", "")
+		bigchunk = bigchunk.replace("!", "")
+		if dt == None: 
+			return ["Why" + " " + sentence[verbI] + " " + sentence[subI] + " " + bigchunk + "?"]
+		else:
+			return ["Why" + " " + sentence[verbI] + " " + dt + " " + sentence[subI] + " " + bigchunk + "?"]
+=======
  		bigchunk = ''.join(str(e) + " " for e in sentence[verbI+1:end])
  		bigchunk = bigchunk.replace(".", "")
  		bigchunk = bigchunk.replace("!", "")
@@ -361,6 +449,7 @@ def getWhyQuestions(s):
  			return ["Why" + " " + sentence[verbI] + " " + sentence[subI] + " " + bigchunk + "?"]
  		else:
  			return ["Why" + " " + sentence[verbI] + " " + dt + " " + sentence[subI] + " " + bigchunk + "?"]
+>>>>>>> c3d81427f538c836114751a0b2d27927d08c50f8
 
 
 

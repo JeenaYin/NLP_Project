@@ -358,7 +358,6 @@ def ground(tagged_text, base_date):
 
 def timexTag(txt):
     import nltk
-    print(tag(txt))
     return(tag(txt))
 
 if __name__ == '__main__':
