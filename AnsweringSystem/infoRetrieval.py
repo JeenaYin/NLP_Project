@@ -1,4 +1,4 @@
-import os
+import os, sys
 import nltk
 from collections import defaultdict
 from fuzzywuzzy import fuzz
@@ -32,12 +32,10 @@ def getTargetSentence(question, sentenceList):
 	possibleTargetSentences = []
 	maxScore = 0
 	bestSentence = ""
-	for sentence in sentenceList: 
-		# print(sentence)
-		# print(questionRank)
+	for sentence in sentenceList:
 		questionRank = fuzz.token_set_ratio(question, sentence)
-		print(sentence)
-		print(questionRank)
+		#print(sentence)
+		#print(questionRank)
 		if questionRank > THRESHOLD:
 			possibleTargetSentences += [sentence]
 		if questionRank > maxScore:
@@ -46,20 +44,21 @@ def getTargetSentence(question, sentenceList):
 	if possibleTargetSentences == []:
 		return bestSentence;
 	else: 
-		print(possibleTargetSentences)
+		#print(possibleTargetSentences)
 		return possibleTargetSentences[0]
 
 def answerQuestion(targetSentence):
 	return targetSentence
 
 def main():
-	questions = getQuestions("SampleQuestion.txt")
-	sentenceList = getSentences("SampleDocument.txt")
+	questions = getQuestions(sys.argv[1])
+	sentenceList = getSentences(sys.argv[2])
 	for question in questions:
 		target = getTargetSentence(question, sentenceList)
-		print(question)
-		print(target)
-
+		#print(question)
+		#print(target)
+	with open("ChosenSentence.txt", "w") as chosen:
+		chosen.write(target)
 	return 1; 
 
 main();
