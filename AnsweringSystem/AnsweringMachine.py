@@ -34,13 +34,13 @@ class AnsweringMachine(object):
 		with open(questionDoc, 'r') as f:
 			content = f.read()
 			f.close()
-		for question in content.splitlines():
+		for question in content.strip().splitlines():
 			self.questionList.append(question)
 		self.sentenceList = []
 		with open(sentenceDoc, 'r') as f:
 			content = f.read()
 			f.close()
-		for question in content.splitlines():
+		for question in content.strip().splitlines():
 			self.sentenceList.append(question)
 		# etc.
 		self.wh = "who what when where"
@@ -52,6 +52,7 @@ class AnsweringMachine(object):
 		#translator = str.maketrans('', '', string.punctuation)
 		#preppedString = s.translate(translator)
 		#preppedString = s.replace(".", " punc").replace(",", " punc").replace("!", " punc").replace("?", " punc")
+		preppedString = s.strip()
 		preppedString = s.replace(".", " .").replace(",", " ,").replace("!", " !").replace("?", " ?").replace(";", " ;")
 		preppedString = timex.timexTag(preppedString)
 		return(preppedString)
@@ -99,7 +100,7 @@ class AnsweringMachine(object):
 				q_identified_words.append(word)
 		target_sentence_tags = nltk.word_tokenize(sentence)
 		s_tags = nltk.pos_tag(target_sentence_tags)
-		print(s_tags)
+		# print(s_tags)
 		negative_words = ["does not", "is not", "not", "don't"]
 		is_negative = False
 		for word,tag in s_tags:
@@ -169,6 +170,7 @@ class AnsweringMachine(object):
 	def run(self):
 		# answer all questions
 		for i in range(0, len(self.questionList)):
+			print(str(i)+": "+self.questionList[i])
 			self.answerQuestion(self.questionList[i], self.sentenceList[i])
 
 if __name__ == '__main__':
