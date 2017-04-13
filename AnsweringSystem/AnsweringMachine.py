@@ -25,7 +25,6 @@ jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
 model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
 pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 
-
 class AnsweringMachine(object):
 
 	def __init__(self, questionDoc, sentenceDoc):
@@ -64,7 +63,6 @@ class AnsweringMachine(object):
 			pureTuple = (ent[0][0], ent[1])
 			entities.append(pureTuple)
 		return(entities)
->>>>>>> 00efee1aeac3160dc1acf286a12ba0f2e859b4c0
 
 	# input: None
 	# output: a STRING, with the part of the sentence bound to contain answer
@@ -100,16 +98,17 @@ class AnsweringMachine(object):
 		searchObj = re.findall(r'did|was|is|who|what|where|when|how', self.question, re.I)
 		qType = None
 		# if only one question-word, take that
+		print(searchObj)
 		if (len(searchObj) == 1):
 			qType = searchObj[0]
 		# if >1 question-word, take first wh-words if exists, otherwise just take the first word
-		else:
+		elif(len(searchObj)>1):
 			for word in searchObj:
 				if ((word in self.wh) and (qType == None)):
 					qType = word
 			if (qType == None): qType = searchObj[0]
 		# note that we are working in lower case to identify question types
-		if (qType.lower() in self.wh):
+		if (searchObj and qType.lower() in self.wh):
 			answer = self.answerWh(qType.lower())
 		else:
 			answer = self.answerBinary()
@@ -117,18 +116,26 @@ class AnsweringMachine(object):
 
 	# consider binary (yes or no) questions
 	def answerBinary(self):
-		answer = False
-		phraseOfInterest = ""
-		# figure out the question-phrase we are interested in
-		questionRelations = []
-		if (len(questionRelations) > 1): # how to pick the relation of interest?
-			pass
-		# figure out the relations of the sentence
-		sentenceRelations = []
-		# check the relations of the sentence for the specific question phrase
-		for relation in sentenceRelations:
-			if (phraseOfInterest in relation):
-				answer = True
+		#first tag all
+		answer = "Yes"
+		question_tags = nltk.word_tokenize(self.question)
+		q_tags = nltk.pos_tag(question_tags)
+		q_identified_words = []
+		for word,tag in q_tags:
+			if("NN" in tag or "J" in tag):
+				q_identified_words.append(word)
+		target_sentence_tags = nltk.word_tokenize(self.sentence)
+		s_tags = nltk.pos_tag(target_sentence_tags)
+		print(s_tags)
+		negative_words = ["does not", "is not", "not", "don't"]
+		is_negative = False
+		for word,tag in s_tags:
+			if(word in q_identified_words):
+				answer = "Yes"
+			if(word in negative_words):
+				is_negative = True
+		if(is_negative):
+			answer = "No"
 		return(answer)
 
 	# consider wh- (subject specific) questions
