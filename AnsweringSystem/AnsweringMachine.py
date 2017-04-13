@@ -89,16 +89,16 @@ class AnsweringMachine(object):
 		print(answer)
 
 	# consider binary (yes or no) questions
-	def answerBinary(self):
+	def answerBinary(self,question,sentence):
 		#first tag all
 		answer = "Yes"
-		question_tags = nltk.word_tokenize(self.question)
+		question_tags = nltk.word_tokenize(question)
 		q_tags = nltk.pos_tag(question_tags)
 		q_identified_words = []
 		for word,tag in q_tags:
 			if("NN" in tag or "J" in tag):
 				q_identified_words.append(word)
-		target_sentence_tags = nltk.word_tokenize(self.sentence)
+		target_sentence_tags = nltk.word_tokenize(sentence)
 		s_tags = nltk.pos_tag(target_sentence_tags)
 		# print(s_tags)
 		negative_words = ["does not", "is not", "not", "don't"]
