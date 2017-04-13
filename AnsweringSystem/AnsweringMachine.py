@@ -29,17 +29,20 @@ pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 class AnsweringMachine(object):
 
 	def __init__(self, questionDoc, sentenceDoc):
-		# unpack question and answer from txt files to strings
+		# unpack question(s) and sentence(s) from txt files to strings
+		self.questionList = []
 		with open(questionDoc, 'r') as f:
-			questionString = f.read()
-			self.originalQuestion = f.read # save copy of original
-			questionString = self.clean(questionString)
-		self.question = questionString
+			content = f.read()
+			f.close()
+		for question in content.splitlines():
+			self.questionList.append(question)
+		self.sentenceList = []
 		with open(sentenceDoc, 'r') as f:
-			sentenceString = f.read()
-			self.originalSentence = f.read # save copy of original
-			sentenceString = self.clean(sentenceString)
-		self.sentence = sentenceString
+			content = f.read()
+			f.close()
+		for question in content.splitlines():
+			self.sentenceList.append(question)
+		# etc.
 		self.wh = "who what when where"
 
 	# remove punctuation
@@ -57,7 +60,6 @@ class AnsweringMachine(object):
 	# input: a STRING, the sentence to be evaluated
 	# return: a LIST of TUPLES, each containing the word and its named entity
 	def ner(self, sentence):
-		#st = NERTagger('../stanford-ner/classifiers/all.3class.distsim.crf.ser.gz','../stanford-ner/stanford-ner.jar')
 		rawEntities = nltk.ne_chunk(nltk.pos_tag(word_tokenize(sentence))).pos() # tree object
 		entities = list()
 		for ent in rawEntities:
@@ -65,38 +67,9 @@ class AnsweringMachine(object):
 			entities.append(pureTuple)
 		return(entities)
 
-	# input: None
-	# output: a STRING, with the part of the sentence bound to contain answer
-	# This function is used to obtain noun-based answers when entity-tagging fails
-	# used on the sentence conditionally for "who" and always for "what"
-	# Works by finding verb, and including words around it
-	# def subSentence(self):
-	# 	taggedSent = nltk.pos_tag(nltk.word_tokenize(self.originalSentence))
-	# 	inPhrase = 0 # switch for when to take words
-	# 	NPgrammar = "NP: {<DT>?<JJ>*<NN>}"
-	# 	cp = nltk.RegexpParser(NPgrammar)
-	# 	result = cp.parse(taggedSent)
-	# 	for (wordNum in range(0,taggedSent)):
-	# 		if (taggedSent[wordNum][1] in verbTypes):
-	# 			verbs.append(wordNum)
-	# 		if (taggedSent[wordNum][1] in nounTypes):
-	# 			nouns.append(wordNum)
-	# 	if (len(verbs) == 0): 
-	# 		return(self.originalSentence) # no verb... something is wrong
-	# 	else: 
-	# 		first = min(verbs+nouns)
-	# 		last = max(verbs+nouns)
-
-	# 	return(subject)
-
-	def answerQuestion(self):
-		# st = StanfordPOSTagger('english-bidirectional-distsim.tagger')
-		# tags = st.tag('What is the airspeed of an unladen swallow ?'.split())
-		#text = pos_tagger.tag(word_tokenize("What's the airspeed of an unladen swallow ?"))
-		#print(text)
-
+	def answerQuestion(self, question, sentence):
 		# all the question tags we will cownsider
-		searchObj = re.findall(r'did|was|is|who|what|where|when|how', self.question, re.I)
+		searchObj = re.findall(r'did|was|is|who|what|where|when|how', question, re.I)
 		qType = None
 		# if only one question-word, take that
 		if (len(searchObj) == 1):
@@ -109,7 +82,7 @@ class AnsweringMachine(object):
 			if (qType == None): qType = searchObj[0]
 		# note that we are working in lower case to identify question types
 		if (qType.lower() in self.wh):
-			answer = self.answerWh(qType.lower())
+			answer = self.answerWh(qType.lower(), question, sentence)
 		else: 
 			answer = self.answerBinary()
 		print(answer)
@@ -131,12 +104,14 @@ class AnsweringMachine(object):
 		return(answer)
 
 	# consider wh- (subject specific) questions
-	def answerWh(self, wh):
+	def answerWh(self, wh, question, sentence):
 		answer = ""
 		answerLocs = []
+		cQuestion = self.clean(question)
+		cSentence = self.clean(sentence)
 		if (wh == "who"):
-			questionEnts = self.ner(self.question)
-			sentenceEnts = self.ner(self.sentence)
+			questionEnts = self.ner(cQuestion)
+			sentenceEnts = self.ner(cSentence)
 			for entNum in range(0,len(sentenceEnts)):
 				if (sentenceEnts[entNum][1] == "PERSON"):
 					answerLocs.append(entNum)
@@ -150,8 +125,8 @@ class AnsweringMachine(object):
 			if (answer == ""): answer = self.originalSentence # get subject of sentence
 			return(answer)
 		if (wh == "where"):
-			questionEnts = self.ner(self.question)
-			sentenceEnts = self.ner(self.sentence)
+			questionEnts = self.ner(cQuestion)
+			sentenceEnts = self.ner(cSentence)
 			answer = "In "
 			for entNum in range(0,len(sentenceEnts)):
 				if (sentenceEnts[entNum][1] == "GPE"):
@@ -163,10 +138,11 @@ class AnsweringMachine(object):
 				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
 					answer += "and"
 					answer += " "
+			if (answer == ""): answer = sentence # get subject of sentence
 			return(answer)
 		# time questions
 		if (wh == "when"):
-			words = self.sentence.split()
+			words = cSentence.split()
 			answer = ""
 			inTimex = 0 # a tracker for if we are in a timex tagged phrase
 			for wordNum in range(0,len(words)):
@@ -180,10 +156,12 @@ class AnsweringMachine(object):
 			return(answer)
 		# what question
 		if (wh == "what"):
-			answer = self.originalSentence # return the whole best sentence
+			answer = sentence # return the whole best sentence
 
 	def run(self):
-		self.answerQuestion()
+		# answer all questions
+		for i in range(0, len(self.questionList)):
+			self.answerQuestion(self.questionList[i], self.sentenceList[i])
 
 if __name__ == '__main__':
 	AnsweringMachine(questionDoc=sys.argv[1], sentenceDoc=sys.argv[2]).run()
