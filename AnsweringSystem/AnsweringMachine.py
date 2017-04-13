@@ -25,6 +25,7 @@ jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
 model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
 pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 
+
 class AnsweringMachine(object):
 
 	def __init__(self, questionDoc, sentenceDoc):
@@ -66,89 +67,49 @@ class AnsweringMachine(object):
 			entities.append(pureTuple)
 		return(entities)
 
-<<<<<<< HEAD
-	# input: None
-	# output: a STRING, with the part of the sentence bound to contain answer
-	# This function is used to obtain noun-based answers when entity-tagging fails
-	# used on the sentence conditionally for "who" and always for "what"
-	# Works by finding verb, and including words around it
-	# def subSentence(self):
-	# 	taggedSent = nltk.pos_tag(nltk.word_tokenize(self.originalSentence))
-	# 	inPhrase = 0 # switch for when to take words
-	# 	NPgrammar = "NP: {<DT>?<JJ>*<NN>}"
-	# 	cp = nltk.RegexpParser(NPgrammar)
-	# 	result = cp.parse(taggedSent)
-	# 	for (wordNum in range(0,taggedSent)):
-	# 		if (taggedSent[wordNum][1] in verbTypes):
-	# 			verbs.append(wordNum)
-	# 		if (taggedSent[wordNum][1] in nounTypes):
-	# 			nouns.append(wordNum)
-	# 	if (len(verbs) == 0):
-	# 		return(self.originalSentence) # no verb... something is wrong
-	# 	else:
-	# 		first = min(verbs+nouns)
-	# 		last = max(verbs+nouns)
-
-	# 	return(subject)
-
-	def answerQuestion(self):
-		# st = StanfordPOSTagger('english-bidirectional-distsim.tagger')
-		# tags = st.tag('What is the airspeed of an unladen swallow ?'.split())
-		#text = pos_tagger.tag(word_tokenize("What's the airspeed of an unladen swallow ?"))
-		#print(text)
-
-=======
 	def answerQuestion(self, question, sentence):
->>>>>>> bed8ee09370486a9365e6e791e48dd41231d8404
 		# all the question tags we will cownsider
 		searchObj = re.findall(r'did|was|is|who|what|where|when|how', question, re.I)
 		qType = None
 		# if only one question-word, take that
-		print(searchObj)
 		if (len(searchObj) == 1):
 			qType = searchObj[0]
 		# if >1 question-word, take first wh-words if exists, otherwise just take the first word
-		elif(len(searchObj)>1):
+		else:
 			for word in searchObj:
 				if ((word in self.wh) and (qType == None)):
 					qType = word
 			if (qType == None): qType = searchObj[0]
 		# note that we are working in lower case to identify question types
-<<<<<<< HEAD
-		if (searchObj and qType.lower() in self.wh):
-			answer = self.answerWh(qType.lower())
-		else:
-=======
 		if (qType.lower() in self.wh):
 			answer = self.answerWh(qType.lower(), question, sentence)
-		else: 
->>>>>>> bed8ee09370486a9365e6e791e48dd41231d8404
+		else:
 			answer = self.answerBinary()
 		print(answer)
 
-	# consider binary (yes or no) questions
-	def answerBinary(self):
-		#first tag all
-		answer = "Yes"
-		question_tags = nltk.word_tokenize(self.question)
-		q_tags = nltk.pos_tag(question_tags)
-		q_identified_words = []
-		for word,tag in q_tags:
-			if("NN" in tag or "J" in tag):
-				q_identified_words.append(word)
-		target_sentence_tags = nltk.word_tokenize(self.sentence)
-		s_tags = nltk.pos_tag(target_sentence_tags)
-		print(s_tags)
-		negative_words = ["does not", "is not", "not", "don't"]
-		is_negative = False
-		for word,tag in s_tags:
-			if(word in q_identified_words):
-				answer = "Yes"
-			if(word in negative_words):
-				is_negative = True
-		if(is_negative):
-			answer = "No"
-		return(answer)
+# consider binary (yes or no) questions
+def answerBinary(self):
+	#first tag all
+	answer = "Yes"
+	question_tags = nltk.word_tokenize(self.question)
+	q_tags = nltk.pos_tag(question_tags)
+	q_identified_words = []
+	for word,tag in q_tags:
+		if("NN" in tag or "J" in tag):
+			q_identified_words.append(word)
+	target_sentence_tags = nltk.word_tokenize(self.sentence)
+	s_tags = nltk.pos_tag(target_sentence_tags)
+	print(s_tags)
+	negative_words = ["does not", "is not", "not", "don't"]
+	is_negative = False
+	for word,tag in s_tags:
+		if(word in q_identified_words):
+			answer = "Yes"
+		if(word in negative_words):
+			is_negative = True
+	if(is_negative):
+		answer = "No"
+	return(answer)
 
 	# consider wh- (subject specific) questions
 	def answerWh(self, wh, question, sentence):
