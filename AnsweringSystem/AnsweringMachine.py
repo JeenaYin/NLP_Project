@@ -34,13 +34,13 @@ class AnsweringMachine(object):
 		with open(questionDoc, 'r') as f:
 			content = f.read()
 			f.close()
-		for question in content.splitlines():
+		for question in content.strip().splitlines():
 			self.questionList.append(question)
 		self.sentenceList = []
 		with open(sentenceDoc, 'r') as f:
 			content = f.read()
 			f.close()
-		for question in content.splitlines():
+		for question in content.strip().splitlines():
 			self.sentenceList.append(question)
 		# etc.
 		self.wh = "who what when where"
@@ -52,6 +52,7 @@ class AnsweringMachine(object):
 		#translator = str.maketrans('', '', string.punctuation)
 		#preppedString = s.translate(translator)
 		#preppedString = s.replace(".", " punc").replace(",", " punc").replace("!", " punc").replace("?", " punc")
+		preppedString = s.strip()
 		preppedString = s.replace(".", " .").replace(",", " ,").replace("!", " !").replace("?", " ?").replace(";", " ;")
 		preppedString = timex.timexTag(preppedString)
 		return(preppedString)
@@ -87,29 +88,29 @@ class AnsweringMachine(object):
 			answer = self.answerBinary()
 		print(answer)
 
-# consider binary (yes or no) questions
-def answerBinary(self):
-	#first tag all
-	answer = "Yes"
-	question_tags = nltk.word_tokenize(self.question)
-	q_tags = nltk.pos_tag(question_tags)
-	q_identified_words = []
-	for word,tag in q_tags:
-		if("NN" in tag or "J" in tag):
-			q_identified_words.append(word)
-	target_sentence_tags = nltk.word_tokenize(self.sentence)
-	s_tags = nltk.pos_tag(target_sentence_tags)
-	print(s_tags)
-	negative_words = ["does not", "is not", "not", "don't"]
-	is_negative = False
-	for word,tag in s_tags:
-		if(word in q_identified_words):
-			answer = "Yes"
-		if(word in negative_words):
-			is_negative = True
-	if(is_negative):
-		answer = "No"
-	return(answer)
+	# consider binary (yes or no) questions
+	def answerBinary(self):
+		#first tag all
+		answer = "Yes"
+		question_tags = nltk.word_tokenize(self.question)
+		q_tags = nltk.pos_tag(question_tags)
+		q_identified_words = []
+		for word,tag in q_tags:
+			if("NN" in tag or "J" in tag):
+				q_identified_words.append(word)
+		target_sentence_tags = nltk.word_tokenize(self.sentence)
+		s_tags = nltk.pos_tag(target_sentence_tags)
+		# print(s_tags)
+		negative_words = ["does not", "is not", "not", "don't"]
+		is_negative = False
+		for word,tag in s_tags:
+			if(word in q_identified_words):
+				answer = "Yes"
+			if(word in negative_words):
+				is_negative = True
+		if(is_negative):
+			answer = "No"
+		return(answer)
 
 	# consider wh- (subject specific) questions
 	def answerWh(self, wh, question, sentence):
@@ -169,6 +170,7 @@ def answerBinary(self):
 	def run(self):
 		# answer all questions
 		for i in range(0, len(self.questionList)):
+			print(str(i)+": "+self.questionList[i])
 			self.answerQuestion(self.questionList[i], self.sentenceList[i])
 
 if __name__ == '__main__':
