@@ -21,9 +21,9 @@ sys.path.append(os.path.abspath("../Dependencies/"))
 import timex
 
 # Add the jar and model via their path (instead of setting environment variables):
-jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
-model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
-pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
+# jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
+# model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
+# pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 
 
 class AnsweringMachine(object):
@@ -101,7 +101,7 @@ class AnsweringMachine(object):
 		target_sentence_tags = nltk.word_tokenize(sentence)
 		s_tags = nltk.pos_tag(target_sentence_tags)
 		# print(s_tags)
-		negative_words = ["does not", "is not", "not", "don't"]
+		negative_words = ["does not", "is not", "not", "don't", "isn't", "is not"]
 		is_negative = False
 		for word,tag in s_tags:
 			if(word in q_identified_words):
