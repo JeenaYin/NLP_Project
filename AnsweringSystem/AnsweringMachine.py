@@ -17,7 +17,7 @@ from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
-sys.path.append(os.path.abspath("../Dependencies/"))
+#sys.path.append(os.path.abspath("../Dependencies/"))
 import timex
 
 # Add the jar and model via their path (instead of setting environment variables):
