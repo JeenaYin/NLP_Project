@@ -17,13 +17,13 @@ from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
-sys.path.append(os.path.abspath("../Dependencies/"))
+#sys.path.append(os.path.abspath("../Dependencies/"))
 import timex
 
 # Add the jar and model via their path (instead of setting environment variables):
-jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
-model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
-pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
+# jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
+# model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
+# pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
 
 
 class AnsweringMachine(object):

@@ -3,7 +3,7 @@ import nltk
 import string
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import defaultdict
-from fuzzywuzzy import fuzz
+
 
 questionList = []
 THRESHOLD = 60
@@ -31,14 +31,16 @@ def getSentences(textfile):
 # Take a sentence and return its stripped down, lemmatized form
 def lemmatize(s):
 	# remove punctuation
-	translator = str.maketrans('', '', string.punctuation)
-	s2 = s.translate(translator)
+	s2 = s.translate(None, string.punctuation)
 	lemString = ""
 	for word in s2.split():
 		lemString += wnl.lemmatize(word.lower())
 		lemString += " "
 	return lemString
 
+def weightWords(document):
+	weightDict = dict()
+	return weightDict
 
 def getTargetSentence(question, sentenceList):
 	questionDict = dict()
@@ -49,8 +51,6 @@ def getTargetSentence(question, sentenceList):
 	for sentence in sentenceList:
 		lemSentence = lemmatize(sentence)
 		questionRank = fuzz.token_set_ratio(lemQuestion, lemSentence)
-		print(sentence)
-		print(questionRank)
 		if questionRank > THRESHOLD:
 			possibleTargetSentences += [sentence]
 		if questionRank > maxScore:
@@ -58,7 +58,7 @@ def getTargetSentence(question, sentenceList):
 			maxScore = questionRank
 	if possibleTargetSentences == []:
 		return bestSentence;
-	else: 
+	else: 	
 		return possibleTargetSentences[0]
 
 def answerQuestion(targetSentence):
@@ -71,8 +71,6 @@ def main():
 		chosen.write("")
 	for question in questions:
 		target = getTargetSentence(question, sentenceList)
-		#print(question)
-		#print(target)
 		with open("ChosenSentences.txt", "a") as chosen:
 			chosen.write(target)
 			chosen.write("\n")
