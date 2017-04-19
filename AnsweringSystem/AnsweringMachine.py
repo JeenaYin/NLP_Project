@@ -101,7 +101,7 @@ class AnsweringMachine(object):
 		target_sentence_tags = nltk.word_tokenize(sentence)
 		s_tags = nltk.pos_tag(target_sentence_tags)
 		# print(s_tags)
-		negative_words = ["does not", "is not", "not", "don't"]
+		negative_words = ["does not", "is not", "not", "don't", "isn't", "is not"]
 		is_negative = False
 		for word,tag in s_tags:
 			if(word in q_identified_words):
