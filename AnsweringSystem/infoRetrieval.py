@@ -35,8 +35,9 @@ class InfoRetrieval(object):
 		# remove punctuation in python 3.0+
 		translator = str.maketrans('', '', string.punctuation)
 		s2 = s.translate(translator)
+		s3 = nltk.tokenize.word_tokenize(s2)
 		lemString = ""
-		for word in s2.split():
+		for word in s3:
 			lemString += self.wnl.lemmatize(word.lower())
 			lemString += " "
 		return lemString
