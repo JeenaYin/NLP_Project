@@ -16,6 +16,7 @@ from nltk.tag.stanford import StanfordPOSTagger
 from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 from nltk.tag import StanfordPOSTagger
+from nltk.stem import PorterStemmer
 from nltk import word_tokenize
 import timex
 
@@ -37,6 +38,7 @@ class AnsweringMachine(object):
 			self.sentenceList.append(question)
 		# etc.
 		self.wh = "who what when where which"
+		self.portStem = PorterStemmer()
 
 	# remove punctuation
 	# input: STRING
@@ -111,31 +113,43 @@ class AnsweringMachine(object):
 		# verbs that don't need consideration
 		detVbs = ["does", "did", "do", "is", "was", "will", "were", "are"]
 		vbs = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
-		nns = ["NN", "NNS", "NNPS", "NNP"]
+		nns = ["NN", "NNS", "NNPS", "NNP", "PRP"]
+		ajs = ["JJ", "JJS", "JJR", "IN"]
 		qPOS = nltk.pos_tag(nltk.word_tokenize(question))
 		sentPOS = nltk.pos_tag(nltk.word_tokenize(sentence))
 		coreQ = []
 		for i in qPOS:
-			if ((i[0] not in detVbs) and (i[1] in vbs+nns)):
-				coreQ.append(i[0])
+			if ((i[0] not in detVbs) and (i[1] in vbs+nns+ajs)):
+				coreQ.append(self.portStem.stem(i[0]))
 		coreLocs = [] # in-question verbs/nouns
 		otherLocs = [] # non-question verbs/nouns
 		for j in range(0, len(sentPOS)):
-			curWord = sentPOS[j][0]
+			curWord = self.portStem.stem(sentPOS[j][0])
 			curTag = sentPOS[j][1]
 			if (curWord in coreQ):
 				coreLocs.append(j)
-			if ((curWord not in coreQ) and (curTag in vbs+nns)):
+			if ((curWord not in coreQ+detVbs) and (curTag in vbs+nns+ajs)):
 				otherLocs.append(j)
-		if (len(otherLocs == 0)):
-			answer = sentence
+		if (len(otherLocs) == 0):
+			return(sentence)
 		# prefer to return answers after the subject 
-		elif (max(coreLocs) < max(otherLocs)):
+		startPhrase = ""
+		if (max(coreLocs) < max(otherLocs)):
 			ansRange = [i for i in otherLocs if i > max(coreLocs)]
 			ansRange = range(min(ansRange), max(ansRange)+1)
-			answer = [sentPOS[i][0] for i in ansRange]
 		# if only have content before, return that
-		###### TODO 
+		if (min(coreLocs) > min(otherLocs)):
+			ansRange = [i for i in otherLocs if i < min(coreLocs)]
+			ansRange = range(min(ansRange), max(ansRange)+1)
+			if (sentPOS[(max(ansRange)-1 in nns)][0] and (sentPOS[max(ansRange)][0] in vbs)):
+				ansRange = range(min(ansRange), max(ansRange)-1)				
+		# find out if we need to format extra
+		ansWords = [sentPOS[i][0] for i in ansRange]
+		if (sentPOS[min(ansRange)][1] in nns):
+			startPhrase = "Because of "
+		if (sentPOS[min(ansRange)][1] in vbs):
+			startPhrase = "To "
+		answer = startPhrase + " ".join(ansWords)
 		return(answer)
 
 	# consider wh- (subject specific) questions
