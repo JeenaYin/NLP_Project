@@ -157,7 +157,7 @@ class AnsweringMachine(object):
 				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
 					answer += "and"
 					answer += " "
-			if (answer == ""): answer = self.originalSentence # get original sentence
+			if (answer == ""): answer = sentence # get original sentence
 			return(answer)
 		if (wh == "where"):
 			questionEnts = self.ner(cQuestion)
@@ -173,7 +173,7 @@ class AnsweringMachine(object):
 				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
 					answer += "and"
 					answer += " "
-			if (answer == ""): answer = self.originalSentence # get original sentence
+			if (answer == ""): answer = sentence # get original sentence
 			return(answer)
 		# time questions
 		if (wh == "when"):
