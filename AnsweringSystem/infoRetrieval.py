@@ -1,7 +1,8 @@
 import os, sys
 import nltk
 import string
-from nltk.stem.wordnet import WordNetLemmatizer
+#from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 from collections import defaultdict
 
 
@@ -12,7 +13,8 @@ class InfoRetrieval(object):
 		self.document = document
 		self.questionList = []
 		self.wordWeights = dict()
-		self.wnl = WordNetLemmatizer()
+		#self.wnl = WordNetLemmatizer()
+		self.portStem = PorterStemmer()
 
 	def getQuestions(self):
 		with open(self.questionDoc, "rt") as fileContents:
@@ -30,7 +32,7 @@ class InfoRetrieval(object):
 		possibleSentences = nltk.tokenize.sent_tokenize(content.replace("\n", " . "))
 		return possibleSentences
 
-	# Take a sentence and return its stripped down, lemmatized form
+	# Take a sentence and return its stripped down, stemmed form
 	def lemmatize(self, s):
 		# remove punctuation in python 3.0+
 		translator = str.maketrans('', '', string.punctuation)
@@ -40,7 +42,7 @@ class InfoRetrieval(object):
 		lemString = ""
 		# actually lemmatize
 		for word in s3:
-			lemString += self.wnl.lemmatize(word.lower())
+			lemString += self.portStem.stem(word.lower())
 			lemString += " "
 		return lemString
 

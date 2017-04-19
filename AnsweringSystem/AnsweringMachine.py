@@ -17,14 +17,7 @@ from nltk.parse.stanford import StanfordParser
 from nltk.parse.stanford import StanfordDependencyParser
 from nltk.tag import StanfordPOSTagger
 from nltk import word_tokenize
-#sys.path.append(os.path.abspath("../Dependencies/"))
 import timex
-
-# Add the jar and model via their path (instead of setting environment variables):
-# jar = '../stanford-postagger-2016-10-31/stanford-postagger.jar'
-# model = '../stanford-postagger-2016-10-31/models/english-left3words-distsim.tagger'
-# pos_tagger = StanfordPOSTagger(model, jar, encoding='utf8')
-
 
 class AnsweringMachine(object):
 
@@ -48,10 +41,7 @@ class AnsweringMachine(object):
 	# remove punctuation
 	# input: STRING
 	# output: STRING which is stripped
-	def clean(self, s):
-		#translator = str.maketrans('', '', string.punctuation)
-		#preppedString = s.translate(translator)
-		#preppedString = s.replace(".", " punc").replace(",", " punc").replace("!", " punc").replace("?", " punc")
+	def clean(self, s):	
 		preppedString = s.strip()
 		preppedString = s.replace(".", " .").replace(",", " ,").replace("!", " !").replace("?", " ?").replace(";", " ;")
 		preppedString = timex.timexTag(preppedString)
@@ -67,6 +57,7 @@ class AnsweringMachine(object):
 			pureTuple = (ent[0][0], ent[1])
 			entities.append(pureTuple)
 		return(entities)
+
 
 	def answerQuestion(self, question, sentence):
 		# all the question tags we will cownsider
@@ -84,6 +75,8 @@ class AnsweringMachine(object):
 		# note that we are working in lower case to identify question types
 		if (qType.lower() in self.wh):
 			answer = self.answerWh(qType.lower(), question, sentence)
+		elif (qType.lower() == "why"):
+			answer = self.answerWhy(question, sentence)
 		else:
 			answer = self.answerBinary(question, sentence)
 		print(answer)
@@ -112,6 +105,39 @@ class AnsweringMachine(object):
 			answer = "No"
 		return(answer)
 
+	# answer why by trying to pick out substring
+	def answerWhy(self, question, sentence):
+		answer = ""
+		# verbs that don't need consideration
+		detVbs = ["does", "did", "do", "is", "was", "will", "were", "are"]
+		vbs = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
+		nns = ["NN", "NNS", "NNPS", "NNP"]
+		qPOS = nltk.pos_tag(nltk.word_tokenize(question))
+		sentPOS = nltk.pos_tag(nltk.word_tokenize(sentence))
+		coreQ = []
+		for i in qPOS:
+			if ((i[0] not in detVbs) and (i[1] in vbs+nns)):
+				coreQ.append(i[0])
+		coreLocs = [] # in-question verbs/nouns
+		otherLocs = [] # non-question verbs/nouns
+		for j in range(0, len(sentPOS)):
+			curWord = sentPOS[j][0]
+			curTag = sentPOS[j][1]
+			if (curWord in coreQ):
+				coreLocs.append(j)
+			if ((curWord not in coreQ) and (curTag in vbs+nns)):
+				otherLocs.append(j)
+		if (len(otherLocs == 0)):
+			answer = sentence
+		# prefer to return answers after the subject 
+		elif (max(coreLocs) < max(otherLocs)):
+			ansRange = [i for i in otherLocs if i > max(coreLocs)]
+			ansRange = range(min(ansRange), max(ansRange)+1)
+			answer = [sentPOS[i][0] for i in ansRange]
+		# if only have content before, return that
+		###### TODO 
+		return(answer)
+
 	# consider wh- (subject specific) questions
 	def answerWh(self, wh, question, sentence):
 		answer = ""
@@ -131,7 +157,7 @@ class AnsweringMachine(object):
 				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
 					answer += "and"
 					answer += " "
-			if (answer == ""): answer = self.originalSentence # get subject of sentence
+			if (answer == ""): answer = self.originalSentence # get original sentence
 			return(answer)
 		if (wh == "where"):
 			questionEnts = self.ner(cQuestion)
@@ -147,7 +173,7 @@ class AnsweringMachine(object):
 				if (answerLocs[locNum+1] - answerLocs[locNum] > 1):
 					answer += "and"
 					answer += " "
-			if (answer == ""): answer = sentence # get subject of sentence
+			if (answer == ""): answer = self.originalSentence # get original sentence
 			return(answer)
 		# time questions
 		if (wh == "when"):
