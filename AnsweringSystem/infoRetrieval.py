@@ -27,7 +27,7 @@ class InfoRetrieval(object):
 			content = fileContents.read()
 			fileContents.close()
 
-		possibleSentences = nltk.tokenize.sent_tokenize(content)
+		possibleSentences = nltk.tokenize.sent_tokenize(content.replace("\n", " . "))
 		return possibleSentences
 
 	# Take a sentence and return its stripped down, lemmatized form
@@ -35,8 +35,10 @@ class InfoRetrieval(object):
 		# remove punctuation in python 3.0+
 		translator = str.maketrans('', '', string.punctuation)
 		s2 = s.translate(translator)
+		# split sentence into words via tokenization
 		s3 = nltk.tokenize.word_tokenize(s2)
 		lemString = ""
+		# actually lemmatize
 		for word in s3:
 			lemString += self.wnl.lemmatize(word.lower())
 			lemString += " "

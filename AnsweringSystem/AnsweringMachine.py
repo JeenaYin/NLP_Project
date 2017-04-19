@@ -43,7 +43,7 @@ class AnsweringMachine(object):
 		for question in content.strip().splitlines():
 			self.sentenceList.append(question)
 		# etc.
-		self.wh = "who what when where"
+		self.wh = "who what when where which"
 
 	# remove punctuation
 	# input: STRING
@@ -70,7 +70,7 @@ class AnsweringMachine(object):
 
 	def answerQuestion(self, question, sentence):
 		# all the question tags we will cownsider
-		searchObj = re.findall(r'did|was|is|who|what|where|when|how', question, re.I)
+		searchObj = re.findall(r'did|was|is|who|what|where|when|how|which|why', question, re.I)
 		qType = None
 		# if only one question-word, take that
 		if (len(searchObj) == 1):
@@ -162,10 +162,13 @@ class AnsweringMachine(object):
 					answer += " "
 				if (words[wordNum] == "TIMEX2"):
 					inTimex = 1
+			year = re.compile("((?<=\s)\d{4}|^\d{4})")
+			# make years sound more natural
+			if (year.findall(answer)): answer = "In " + answer
 			return(answer)
 		# what question
-		if (wh == "what"):
-			answer = sentence # return the whole best sentence
+		if (wh == "what" or wh == "which"):
+			return(sentence) # return the whole best sentence
 
 	def run(self):
 		# answer all questions
