@@ -25,7 +25,7 @@ class InfoRetrieval(object):
 
 
 	def getSentences(self):
-		with open(self.document, "rt") as fileContents:
+		with open(self.document, "rt", encoding = "ISO-8859-1") as fileContents:
 			content = fileContents.read()
 			fileContents.close()
 
@@ -48,7 +48,7 @@ class InfoRetrieval(object):
 
 	def weightWords(self):
 		weightDict = dict()
-		with open(self.document, "rt") as fullDoc:
+		with open(self.document, "rt", encoding = "ISO-8859-1") as fullDoc:
 			f = fullDoc.read()
 			fullDoc.close()
 		# want to lemmatize to equalize word polymorphisms
